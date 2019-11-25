@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { isValidEmail } from '../../lib/utils';
 
 import SmallButton from '../SmallButton';
+import StyledTooltip from '../StyledTooltip';
 
 class PayExpenseBtn extends React.Component {
   static propTypes = {
@@ -132,14 +133,15 @@ class PayExpenseBtn extends React.Component {
             <FormattedMessage id="expense.pay.manual.btn" defaultMessage="record as paid" />
           )}
           {selectedPayoutMethod !== 'other' && (
-            <FormattedMessage
-              id="expense.pay.btn"
-              defaultMessage="pay with {paymentMethod}"
-              values={{ paymentMethod: expense.payoutMethod }}
-            />
+            <StyledTooltip type="error" place="left" content={() => <p>{error}</p>}>
+              <FormattedMessage
+                id="expense.pay.btn"
+                defaultMessage="Pay With {paymentMethod}"
+                values={{ paymentMethod: expense.payoutMethod }}
+              />
+            </StyledTooltip>
           )}
         </SmallButton>
-        <div className="error">{error}</div>
       </div>
     );
   }

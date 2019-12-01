@@ -128,20 +128,20 @@ class PayExpenseBtn extends React.Component {
             }
           `}
         </style>
-        <SmallButton className="pay" onClick={this.onClick} disabled={this.props.disabled || disabled} title={title}>
-          {selectedPayoutMethod === 'other' && (
-            <FormattedMessage id="expense.pay.manual.btn" defaultMessage="record as paid" />
-          )}
-          {selectedPayoutMethod !== 'other' && (
-            <StyledTooltip type="error" place="left" content={() => <p>{error}</p>}>
+        <StyledTooltip type="error" place="left" content={() => <p>{error}</p>}>
+          <SmallButton className="pay" onClick={this.onClick} disabled={this.props.disabled || disabled} title={title}>
+            {selectedPayoutMethod === 'other' && (
+              <FormattedMessage id="expense.pay.manual.btn" defaultMessage="record as paid" />
+            )}
+            {selectedPayoutMethod !== 'other' && (
               <FormattedMessage
                 id="expense.pay.btn"
                 defaultMessage="Pay With {paymentMethod}"
                 values={{ paymentMethod: expense.payoutMethod }}
               />
-            </StyledTooltip>
-          )}
-        </SmallButton>
+            )}
+          </SmallButton>
+        </StyledTooltip>
       </div>
     );
   }

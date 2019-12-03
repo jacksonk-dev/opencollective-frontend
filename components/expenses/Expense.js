@@ -98,6 +98,7 @@ class Expense extends React.Component {
       mode: undefined,
       showUnapproveModal: false,
       refreshing: false,
+      disableActionButtons: false,
     };
 
     this.save = this.save.bind(this);
@@ -168,9 +169,9 @@ class Expense extends React.Component {
   updateExpensesInCurrentTab = async () => {
     // Only refetch in filter tabs i.e pending, approved, ready, paid
     if (this.props.inFilterTab) {
-      this.setState({ refreshing: true, mode: 'summary' });
+      this.setState({ refreshing: true, mode: 'summary', disableActionButtons: true });
       await this.props.refetch();
-      this.setState({ refreshing: false });
+      this.setState({ refreshing: false, disableActionButtons: false });
     }
   };
 
@@ -497,7 +498,7 @@ class Expense extends React.Component {
                             host={host}
                             {...this.state.fees}
                             refetch={this.props.refetch}
-                            disabled={!this.props.allowPayAction}
+                            disabled={!this.props.allowPayAction || this.state.disableActionButtons}
                             lock={this.props.lockPayAction}
                             unlock={this.props.unlockPayAction}
                             updateExpensesInCurrentTab={this.updateExpensesInCurrentTab}
@@ -508,6 +509,7 @@ class Expense extends React.Component {
                             mr={2}
                             buttonStyle="standard"
                             onClick={() => this.setState({ showUnapproveModal: true })}
+                            disabled={this.state.disableActionButtons}
                           >
                             <FormattedMessage id="expense.unapprove.btn" defaultMessage="Unapprove" />
                           </StyledButton>
@@ -516,18 +518,21 @@ class Expense extends React.Component {
                           <MarkExpenseAsUnpaidBtn
                             updateExpensesInCurrentTab={this.updateExpensesInCurrentTab}
                             id={expense.id}
+                            disabled={this.state.disableActionButtons}
                           />
                         )}
                         {canApprove && (
                           <ApproveExpenseBtn
                             id={expense.id}
                             updateExpensesInCurrentTab={this.updateExpensesInCurrentTab}
+                            disabled={this.state.disableActionButtons}
                           />
                         )}
                         {canReject && (
                           <RejectExpenseBtn
                             id={expense.id}
                             updateExpensesInCurrentTab={this.updateExpensesInCurrentTab}
+                            disabled={this.state.disableActionButtons}
                           />
                         )}
                       </div>

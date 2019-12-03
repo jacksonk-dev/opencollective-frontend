@@ -1,0 +1,61 @@
+name: CI
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: CYPRESS_INSTALL_BINARY=0 npm ci
+      - run: npm run lint:quiet
+
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: CYPRESS_INSTALL_BINARY=0 npm ci
+      - run: npm run prettier:check
+
+  check-langs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: CYPRESS_INSTALL_BINARY=0 npm ci
+      - run: ./scripts/check_translations.sh
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: CYPRESS_INSTALL_BINARY=0 npm ci
+      - run: npm run build:updates
+      - run: npm run build:next
+      - run: npm run build:server
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - run: CYPRESS_INSTALL_BINARY=0 npm ci
+      - run: npm run test:jest

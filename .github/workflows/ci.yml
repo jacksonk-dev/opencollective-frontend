@@ -12,14 +12,24 @@ jobs:
         with:
           node-version: '12.x'
 
-      - uses: actions/cache@v1
+      - name: Restore node_modules
+        uses: actions/cache@v1
         id: node-modules
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-            ${{ runner.os }}-node-modules-
+
+      - name: Restore npm cache
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+            - ${{ runner.os }}-npm-cache-
 
       - name: npm install
         if: steps.node-modules.outputs.cache-hit != 'true'
@@ -36,14 +46,24 @@ jobs:
         with:
           node-version: '12.x'
 
-      - uses: actions/cache@v1
+      - name: Restore node_modules
+        uses: actions/cache@v1
         id: node-modules
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-            ${{ runner.os }}-node-modules-
+
+      - name: Restore npm cache
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+            - ${{ runner.os }}-npm-cache-
 
       - name: npm install
         if: steps.node-modules.outputs.cache-hit != 'true'
@@ -60,14 +80,24 @@ jobs:
         with:
           node-version: '12.x'
 
-      - uses: actions/cache@v1
+      - name: Restore node_modules
+        uses: actions/cache@v1
         id: node-modules
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-            ${{ runner.os }}-node-modules-
+
+      - name: Restore npm cache
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+            - ${{ runner.os }}-npm-cache-
 
       - name: npm install
         if: steps.node-modules.outputs.cache-hit != 'true'
@@ -84,20 +114,31 @@ jobs:
         with:
           node-version: '12.x'
 
-      - uses: actions/cache@v1
+      - name: Restore node_modules
+        uses: actions/cache@v1
         id: node-modules
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-            ${{ runner.os }}-node-modules-
+
+      - name: Restore npm cache
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+            - ${{ runner.os }}-npm-cache-
 
       - name: npm install
         if: steps.node-modules.outputs.cache-hit != 'true'
         run: CYPRESS_INSTALL_BINARY=0 npm ci --prefer-offline --no-audit
 
-      - uses: actions/cache@v1
+      - name: Restore .next cache
+        uses: actions/cache@v1
         id: next-cache
         with:
           path: .next/cache
@@ -119,14 +160,24 @@ jobs:
         with:
           node-version: '12.x'
 
-      - uses: actions/cache@v1
+      - name: Restore node_modules
+        uses: actions/cache@v1
         id: node-modules
         with:
           path: node_modules
           key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
-            ${{ runner.os }}-node-modules-
+
+      - name: Restore npm cache
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+            - ${{ runner.os }}-npm-cache-
 
       - name: npm install
         if: steps.node-modules.outputs.cache-hit != 'true'

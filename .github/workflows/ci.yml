@@ -348,3 +348,7 @@ jobs:
           TZ: UTC
           NODE_ENV: circleci
           E2E_TEST: 1
+          CYPRESS_RECORD: true
+          CYPRESS_VIDEO: true
+          CYPRESS_RECORD_KEY: 509b557a-460c-4d91-a9ec-ac8f847175b7
+

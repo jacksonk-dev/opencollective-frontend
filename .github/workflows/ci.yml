@@ -229,3 +229,122 @@ jobs:
       - name: build (api)
         working-directory: opencollective-api
         run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: --entrypoint redis-server
+      postgres:
+        image: mdillon/postgis:9.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - run: sudo apt -y update
+
+      # Used in setup_circleci_db.sh (dropdb, psql and pg_restore)
+      - run: sudo apt -y install postgresql-client
+
+      - uses: actions/checkout@v2-beta
+
+      - uses: actions/checkout@v2-beta
+        with:
+          repository: opencollective/opencollective-api
+          path: 'opencollective-api'
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Restore node_modules
+        uses: actions/cache@v1
+        id: node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Restore npm cache
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-npm-cache-${{ hashFiles('package-lock.json') }}
+            - ${{ runner.os }}-npm-cache-
+
+      - name: npm install
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        run: CYPRESS_INSTALL_BINARY=0 npm ci --prefer-offline --no-audit
+
+      - name: Restore .next cache
+        uses: actions/cache@v1
+        id: next-cache
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-cache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-next-cache-${{ github.sha }}
+            ${{ runner.os }}-next-cache-
+
+      - run: npm run build:updates
+      - run: npm run build:next
+      - run: npm run build:server
+
+      - name: Restore node_modules (api)
+        uses: actions/cache@v1
+        id: api-node-modules
+        with:
+          path: opencollective-api/node_modules
+          key: ${{ runner.os }}-api-v2-node-modules-${{ hashFiles('opencollective-api/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-api-v2-node-modules-${{ hashFiles('opencollective-api/package-lock.json') }}
+
+      - name: Restore npm cache (api)
+        if: steps.api-node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-api-v2-npm-cache-${{ hashFiles('opencollective-api/package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-api-v2-npm-cache-${{ hashFiles('opencollective-api/package-lock.json') }}
+            - ${{ runner.os }}-api-v2-npm-cache-
+
+      - name: npm install (api)
+        working-directory: opencollective-api
+        if: steps.api-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit
+
+      - name: build (api)
+        working-directory: opencollective-api
+        run: npm run build
+
+      - name: Restore Cypress
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('node_modules/cypress/package.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-cypress-${{ hashFiles('node_modules/cypress/package.json') }}
+
+      - run: npx cypress install
+
+      - run: ./scripts/setup_db_github.sh
+
+      - run: ./scripts/run_e2e_tests_github.sh
+        env:
+          TZ: UTC
+          NODE_ENV: circleci
+          E2E_TEST: 1

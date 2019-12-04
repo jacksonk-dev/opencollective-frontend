@@ -184,3 +184,48 @@ jobs:
         run: CYPRESS_INSTALL_BINARY=0 npm ci --prefer-offline --no-audit
 
       - run: npm run test:jest
+
+  build-api:
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: circleci
+      E2E_TEST: 1
+
+    steps:
+      - uses: actions/checkout@v2-beta
+        with:
+          repository: opencollective/opencollective-api
+          path: 'opencollective-api'
+
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Restore node_modules (api)
+        uses: actions/cache@v1
+        id: api-node-modules
+        with:
+          path: opencollective-api/node_modules
+          key: ${{ runner.os }}-api-v2-node-modules-${{ hashFiles('opencollective-api/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-api-v2-node-modules-${{ hashFiles('opencollective-api/package-lock.json') }}
+
+      - name: Restore .npm (api)
+        if: steps.api-node-modules.outputs.cache-hit != 'true'
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-api-v2-npm-cache-${{ hashFiles('opencollective-api/package-lock.json') }}
+          restore-keys: |
+            - ${{ runner.os }}-api-v2-npm-cache-${{ hashFiles('opencollective-api/package-lock.json') }}
+            - ${{ runner.os }}-api-v2-npm-cache-
+
+      - name: install (api)
+        working-directory: opencollective-api
+        if: steps.api-node-modules.outputs.cache-hit != 'true'
+        run: npm ci --prefer-offline --no-audit
+
+      - name: build (api)
+        working-directory: opencollective-api
+        run: npm run build

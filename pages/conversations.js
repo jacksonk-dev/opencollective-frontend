@@ -26,6 +26,7 @@ import ConversationsList from '../components/conversations/ConversationsList';
 import MessageBox from '../components/MessageBox';
 import { Sections } from '../components/collective-page/_constants';
 import PageFeatureNotSupported from '../components/PageFeatureNotSupported';
+import { ConversationListFragment } from '../components/conversations/graphql';
 
 /**
  * The main page to display collectives. Wrap route parameters and GraphQL query
@@ -55,6 +56,11 @@ class ConversationsPage extends React.Component {
         conversations: PropTypes.shape({
           nodes: PropTypes.arrayOf(PropTypes.object),
         }).isRequired,
+        conversationsTags: PropTypes.arrayOf(
+          PropTypes.shape({
+            tag: PropTypes.string.isRequired,
+          }),
+        ).isRequired,
       }),
     }).isRequired, // from withData
   };
@@ -110,13 +116,15 @@ class ConversationsPage extends React.Component {
         return <ErrorPage error={generateError.notFound(collectiveSlug)} log={false} />;
       } else if (data.collective.type !== CollectiveType.COLLECTIVE) {
         return <ErrorPage error={generateError.badCollectiveType()} log={false} />;
-      } else if (!hasFeature(data.collective, FEATURES.CONVERSATIONS)) {
-        return <PageFeatureNotSupported />;
       }
     }
 
-    const collective = data && data.collective;
+    const collective = data.collective;
     const dataIsReady = collective && collective.conversations;
+    if (collective && !hasFeature(collective, FEATURES.CONVERSATIONS)) {
+      return <PageFeatureNotSupported />;
+    }
+
     return (
       <Page collective={collective} {...this.getPageMetaData(collective)} withoutGlobalStyles>
         {!dataIsReady && data.loading ? (
@@ -140,9 +148,6 @@ class ConversationsPage extends React.Component {
                       />
                     </P>
                     <Flex flex="0 0 300px" flexWrap="wrap">
-                      <StyledButton buttonStyle="secondary" minWidth={100} m={2} disabled>
-                        <FormattedMessage id="actions.follow" defaultMessage="Follow" />
-                      </StyledButton>
                       <Link route="create-conversation" params={{ collectiveSlug }}>
                         <StyledButton buttonStyle="primary" m={2}>
                           <FormattedMessage id="conversations.create" defaultMessage="Create conversation" />
@@ -202,21 +207,7 @@ const getData = graphql(
         imageUrl
         twitterHandle
         conversations(tag: $tag) {
-          nodes {
-            id
-            slug
-            title
-            summary
-            createdAt
-            tags
-            fromCollective {
-              id
-              name
-              type
-              slug
-              imageUrl
-            }
-          }
+          ...ConversationListFragment
         }
         conversationsTags {
           id
@@ -224,6 +215,7 @@ const getData = graphql(
         }
       }
     }
+    ${ConversationListFragment}
   `,
   {
     options: {
